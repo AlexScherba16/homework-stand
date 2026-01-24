@@ -13,6 +13,10 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+# Code coverage profiles and other test artifacts
+coverage.*
+*.coverprofile
+profile.cov
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
@@ -22,3 +26,12 @@
 /.idea
 # Go workspace file
 go.work
+# Go workspace file
+go.work.sum
+
+# env file
+.env
+
+# Editor/IDE
+# .idea/
+# .vscode/
