@@ -25,10 +25,12 @@ services:
         condition: service_started
     healthcheck:
       test: [ "CMD-SHELL", "/etc/healthcheck.sh" ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+      interval: 5s
+      timeout: 4s
+      retries: 10
+      start_period: 10s
+    labels:
+      - autoheal=true
     volumes:
       - ./deploy/scripts/probes.sh:/etc/healthcheck.sh:ro
     networks:
@@ -59,10 +61,12 @@ services:
         restart: true
     healthcheck:
       test: [ "CMD-SHELL", "/etc/healthcheck.sh" ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+      interval: 5s
+      timeout: 4s
+      retries: 10
+      start_period: 10s
+    labels:
+      - autoheal=true
     volumes:
       - ./deploy/scripts/probes.sh:/etc/healthcheck.sh:ro
     networks:
@@ -93,10 +97,13 @@ services:
         restart: true
     healthcheck:
       test: [ "CMD-SHELL", "/etc/healthcheck.sh" ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+      interval: 5s
+      timeout: 4s
+      retries: 5
+      start_period: 10s
+    restart: on-failure
+    labels:
+      - autoheal=true
     volumes:
       - ./services/task-service/categories.json:/etc/task-service/categories.json:ro
       - ./deploy/scripts/probes.sh:/etc/healthcheck.sh:ro
@@ -125,10 +132,12 @@ services:
         restart: true
     healthcheck:
       test: [ "CMD-SHELL", "/etc/healthcheck.sh" ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+      interval: 5s
+      timeout: 4s
+      retries: 10
+      start_period: 10s
+    labels:
+      - autoheal=true
     volumes:
       - ./deploy/scripts/probes.sh:/etc/healthcheck.sh:ro
     networks:
