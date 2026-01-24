@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package analytic_service.order.v1;
+
+option go_package = "analytic-service/pkg/analytic/v1;analyticV1";
+
+import "google/type/money.proto";
+import "google/type/decimal.proto";
+import "google/protobuf/timestamp.proto";
+
+
+service AnalyticService{
+  rpc GetUserTaskCount(GetUserTaskCountRequest) returns (GetUserTaskCountResponse);
+}
+
+message GetUserTaskCountRequest{
+  int64 user_id = 1;
+}
+
+message GetUserTaskCountResponse{
+  uint64 task_count = 2;
+}

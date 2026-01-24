@@ -1,0 +1,28 @@
+{
+  "categories": [
+    {
+      "id": "bug",
+      "title": "Bug Fix",
+      "desc": "Fix errors, defects, or malfunctions in the code",
+      "price": 100.0
+    },
+    {
+      "id": "feature",
+      "title": "Feature Development",
+      "desc": "Implement new functionality or enhance existing features",
+      "price": 50.0
+    },
+    {
+      "id": "refactor",
+      "title": "Code Refactoring",
+      "desc": "Improve code structure without changing functionality",
+      "price": 50.0
+    },
+    {
+      "id": "documentation",
+      "title": "Documentation",
+      "desc": "Create or update technical documentation",
+      "price": 10.0
+    }
+  ]
+}

@@ -1,0 +1,339 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "task-service/task/v1/task.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "TaskService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/task_service.task.v1.TaskService/CreateTask": {
+      "post": {
+        "summary": "Создать задачу",
+        "operationId": "TaskService_CreateTask",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/task_service.task.v1.CreateTaskResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/task_service.task.v1.CreateTaskRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TaskService"
+        ]
+      }
+    },
+    "/task_service.task.v1.TaskService/GetCategories": {
+      "post": {
+        "summary": "Получить категории задач",
+        "operationId": "TaskService_GetCategories",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/task_service.task.v1.GetCategoriesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/task_service.task.v1.GetCategoriesRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TaskService"
+        ]
+      }
+    },
+    "/task_service.task.v1.TaskService/GetTask": {
+      "post": {
+        "summary": "Получить задачу",
+        "operationId": "TaskService_GetTask",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/task_service.task.v1.GetTaskResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/task_service.task.v1.GetTaskRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TaskService"
+        ]
+      }
+    },
+    "/task_service.task.v1.TaskService/ListTasks": {
+      "post": {
+        "summary": "Получить задачи пользователя",
+        "operationId": "TaskService_ListTasks",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/task_service.task.v1.ListTasksResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/task_service.task.v1.ListTasksRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TaskService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.protobuf.NullValue": {
+      "type": "string",
+      "enum": [
+        "NULL_VALUE"
+      ],
+      "default": "NULL_VALUE",
+      "description": "`NullValue` is a singleton enumeration to represent the null value for the\n`Value` type union.\n\nThe JSON representation for `NullValue` is JSON `null`.\n\n - NULL_VALUE: Null value."
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "google.type.Money": {
+      "type": "object",
+      "properties": {
+        "currencyCode": {
+          "type": "string",
+          "description": "The three-letter currency code defined in ISO 4217."
+        },
+        "units": {
+          "type": "string",
+          "format": "int64",
+          "description": "The whole units of the amount.\nFor example if `currencyCode` is `\"USD\"`, then 1 unit is one US dollar."
+        },
+        "nanos": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of nano (10^-9) units of the amount.\nThe value must be between -999,999,999 and +999,999,999 inclusive.\nIf `units` is positive, `nanos` must be positive or zero.\nIf `units` is zero, `nanos` can be positive, zero, or negative.\nIf `units` is negative, `nanos` must be negative or zero.\nFor example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000."
+        }
+      },
+      "description": "Represents an amount of money with its currency type."
+    },
+    "task_service.task.v1.CreateTaskRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "categoryId": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "executionTime": {
+          "type": "string"
+        }
+      }
+    },
+    "task_service.task.v1.CreateTaskResponse": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "price": {
+          "$ref": "#/definitions/google.type.Money"
+        }
+      }
+    },
+    "task_service.task.v1.GetCategoriesRequest": {
+      "type": "object"
+    },
+    "task_service.task.v1.GetCategoriesResponse": {
+      "type": "object",
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/task_service.task.v1.GetCategoriesResponse.Category"
+          }
+        }
+      }
+    },
+    "task_service.task.v1.GetCategoriesResponse.Category": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "price": {
+          "$ref": "#/definitions/google.type.Money"
+        }
+      }
+    },
+    "task_service.task.v1.GetTaskRequest": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string"
+        }
+      }
+    },
+    "task_service.task.v1.GetTaskResponse": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "result": {
+          "type": "object",
+          "title": "опциональный результат"
+        },
+        "price": {
+          "$ref": "#/definitions/google.type.Money"
+        }
+      }
+    },
+    "task_service.task.v1.ListTasksRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "task_service.task.v1.ListTasksResponse": {
+      "type": "object",
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/task_service.task.v1.ListTasksResponse.Task"
+          }
+        }
+      }
+    },
+    "task_service.task.v1.ListTasksResponse.Task": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "result": {
+          "type": "object",
+          "title": "опциональный результат"
+        },
+        "price": {
+          "$ref": "#/definitions/google.type.Money"
+        }
+      }
+    }
+  }
+}

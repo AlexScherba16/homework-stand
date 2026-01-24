@@ -1,0 +1,183 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Funny Tasks",
+    "description": "Task application",
+    "version": "1.0"
+  },
+  "tags": [
+    {
+      "name": "profile"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/profile/info": {
+      "get": {
+        "summary": "Получить категории задач",
+        "operationId": "ProfileService_GetProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/api_gateway.profile.v1.GetProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "profile"
+        ]
+      }
+    },
+    "/v1/profile/list": {
+      "get": {
+        "operationId": "ProfileService_GetProfileList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/api_gateway.profile.v1.GetProfileListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userIds",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "int64"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "profile"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "api_gateway.profile.v1.GetProfileListResponse": {
+      "type": "object",
+      "properties": {
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/api_gateway.profile.v1.GetProfileListResponse.Profile"
+          }
+        }
+      }
+    },
+    "api_gateway.profile.v1.GetProfileListResponse.Profile": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "isTaskAllowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "api_gateway.profile.v1.GetProfileResponse": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "tariff": {
+          "$ref": "#/definitions/api_gateway.profile.v1.GetProfileResponse.Tariff"
+        }
+      }
+    },
+    "api_gateway.profile.v1.GetProfileResponse.Tariff": {
+      "type": "object",
+      "properties": {
+        "tariff": {
+          "$ref": "#/definitions/api_gateway.profile.v1.GetProfileResponse.Tariff.Enum"
+        }
+      }
+    },
+    "api_gateway.profile.v1.GetProfileResponse.Tariff.Enum": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "BASE",
+        "MAX"
+      ],
+      "default": "UNKNOWN"
+    },
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    }
+  }
+}

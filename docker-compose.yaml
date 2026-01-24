@@ -1,0 +1,428 @@
+services:
+  ###########################################
+  #             APPLICATION                 #
+  ###########################################
+
+  # profile service
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: build/Dockerfile
+    environment:
+      - HTTP_PORT=8080
+      - ADMIN_HTTP_PORT=8081
+      - GRPC_PORT=7002
+      - TASK_SERVICE_ADDR=task-service:7002
+      - PROFILE_SERVICE_ADDR=profile-service:7002
+    ports:
+      - "7001:7002"
+      - "8081:8080"
+    stop_grace_period: 10s
+    depends_on:
+      task-service:
+        condition: service_started
+      profile-service:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD-SHELL", "/etc/healthcheck.sh" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - ./deploy/scripts/probes.sh:/etc/healthcheck.sh:ro
+    networks:
+      - app-network
+
+  # profile service
+  profile-service:
+    build:
+      context: ./services/profile-service
+      dockerfile: build/Dockerfile
+    environment:
+      - HTTP_PORT=8080
+      - ADMIN_HTTP_PORT=8081
+      - GRPC_PORT=7002
+      - ANALYTIC_SERVICE_ADDR=analytic-service:7002
+    ports:
+      - "7002:7002"
+      - "8082:8080"
+    stop_grace_period: 10s
+    command: ["sleep", "20s"]
+    depends_on:
+      analytic-service:
+        condition: service_started
+      profile-redis-oss-creator:
+        condition: service_completed_successfully
+      profile-service-migrations:
+        condition: service_completed_successfully
+        restart: true
+    healthcheck:
+      test: [ "CMD-SHELL", "/etc/healthcheck.sh" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - ./deploy/scripts/probes.sh:/etc/healthcheck.sh:ro
+    networks:
+      - app-network
+
+  # task service
+  task-service:
+    build:
+      context: ./services/task-service
+      dockerfile: build/Dockerfile
+    environment:
+      - HTTP_PORT=8080
+      - ADMIN_HTTP_PORT=8081
+      - GRPC_PORT=7002
+      - PROFILE_SERVICE_ADDR=profile-service:7002
+    ports:
+      - "7003:7002"
+      - "8083:8080"
+    stop_grace_period: 10s
+    depends_on:
+      profile-service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+        restart: true
+      task-service-migrations:
+        condition: service_completed_successfully
+        restart: true
+    healthcheck:
+      test: [ "CMD-SHELL", "/etc/healthcheck.sh" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - ./services/task-service/categories.json:/etc/task-service/categories.json:ro
+      - ./deploy/scripts/probes.sh:/etc/healthcheck.sh:ro
+    networks:
+      - app-network
+
+  # analytic service
+  analytic-service:
+    build:
+      context: ./services/analytic-service
+      dockerfile: build/Dockerfile
+    environment:
+      - HTTP_PORT=8080
+      - ADMIN_HTTP_PORT=8081
+      - GRPC_PORT=7002
+    ports:
+      - "7004:7002"
+      - "8084:8080"
+    stop_grace_period: 10s
+    depends_on:
+      kafka:
+        condition: service_healthy
+        restart: true
+      analytic-service-migrations:
+        condition: service_completed_successfully
+        restart: true
+    healthcheck:
+      test: [ "CMD-SHELL", "/etc/healthcheck.sh" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - ./deploy/scripts/probes.sh:/etc/healthcheck.sh:ro
+    networks:
+      - app-network
+
+  ###########################################
+  #             INFRASTRUCTURE              #
+  ###########################################
+  autoheal:
+    image: willfarrell/autoheal:1.2.0 # Use a specific version, e.g., 1.2.0
+    restart: unless-stopped
+    # Mount the Docker socket to allow autoheal to interact with the Docker daemon
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    # Optional: Configure autoheal behavior via environment variables
+    environment:
+      # Watch only containers with the label autoheal=true (default setting)
+      - AUTOHEAL_CONTAINER_LABEL=autoheal
+      # Set to "all" to monitor all containers without a specific label
+      # - AUTOHEAL_CONTAINER_LABEL=all
+      - AUTOHEAL_INTERVAL=5 # Check every 5 seconds
+
+  ###########################################
+  #             DATABASES                   #
+  ###########################################
+  profile-postgres:
+    image: postgres:15.10
+    hostname: profile-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: "profile"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "profile", "-U", "postgres" ]
+      interval: 1s
+      timeout: 2s
+      retries: 5
+    networks:
+      - app-network
+
+  task-postgres:
+    image: postgres:15.10
+    hostname: task-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: "tasks"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "tasks", "-U", "postgres" ]
+      interval: 1s
+      timeout: 2s
+      retries: 5
+    networks:
+      - app-network
+
+  analytic-postgres:
+    image: postgres:15.10
+    hostname: analytic-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: "analytic"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "analytic", "-U", "postgres" ]
+      interval: 1s
+      timeout: 2s
+      retries: 5
+    networks:
+      - app-network
+
+  ###########################################
+  #             REDIS OSS                   #
+  ###########################################
+  profile-redis-oss-1:
+    image: redis:7.4.2-alpine
+    hostname: profile-redis-oss-1
+    ports:
+      - 6000:6000
+      - 16000:16000
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - ./deploy/redis/6000:/etc/redis
+    networks:
+      - app-network
+
+  profile-redis-oss-2:
+    image: redis:7.4.2-alpine
+    hostname: profile-redis-oss-2
+    ports:
+      - 6001:6001
+      - 16001:16001
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - ./deploy/redis/6001:/etc/redis
+    networks:
+      - app-network
+
+  profile-redis-oss-3:
+    image: redis:7.4.2-alpine
+    hostname: profile-redis-oss-3
+    ports:
+      - 6002:6002
+      - 16002:16002
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - ./deploy/redis/6002:/etc/redis
+    networks:
+      - app-network
+
+  profile-redis-oss-4:
+    image: redis:7.4.2-alpine
+    hostname: profile-redis-oss-4
+    ports:
+      - 6003:6003
+      - 16003:16003
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - ./deploy/redis/6003:/etc/redis
+    networks:
+      - app-network
+
+  profile-redis-oss-5:
+    image: redis:7.4.2-alpine
+    hostname: profile-redis-oss-5
+    ports:
+      - 6004:6004
+      - 16004:16004
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - ./deploy/redis/6004:/etc/redis
+    networks:
+      - app-network
+
+  profile-redis-oss-6:
+    image: redis:7.4.2-alpine
+    hostname: profile-redis-oss-6
+    ports:
+      - 6005:6005
+      - 16005:16005
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - ./deploy/redis/6005:/etc/redis
+    networks:
+      - app-network
+
+  profile-redis-oss-creator:
+    image: redis:7.4.2-alpine
+    ports:
+      - 6999:6999
+    command: sh -c "sleep 10 && redis-cli -p 7000 --cluster create \
+      profile-redis-oss-1:6000 profile-redis-oss-2:6001 profile-redis-oss-3:6002 \
+      profile-redis-oss-4:6003 profile-redis-oss-5:6004 profile-redis-oss-6:6005 \
+      --cluster-replicas 1 --cluster-yes"
+    depends_on:
+     - profile-redis-oss-1
+     - profile-redis-oss-2
+     - profile-redis-oss-3
+     - profile-redis-oss-4
+     - profile-redis-oss-5
+     - profile-redis-oss-6
+    networks:
+      - app-network
+
+  ###########################################
+  #             MIGRATIONS                  #
+  ###########################################
+  profile-service-migrations:
+    build:
+      context: ./services/profile-service
+      dockerfile: build/Dockerfile.migrations
+      target: migrations
+    container_name: profile-service-migrations
+    environment:
+      DB_NAME: profile
+      DB_USER: postgres
+      DB_HOST: profile-postgres
+      DB_PORT: 5432
+    command: [ "make", "migrations-up" ]
+    depends_on:
+      profile-postgres:
+        condition: service_healthy
+        restart: true
+    restart: on-failure
+    networks:
+      - app-network
+
+  task-service-migrations:
+    build:
+      context: ./services/task-service
+      dockerfile: build/Dockerfile.migrations
+      target: migrations
+    container_name: task-service-migrations
+    environment:
+      DB_NAME: tasks
+      DB_USER: postgres
+      DB_HOST: task-postgres
+      DB_PORT: 5432
+    command: [ "make", "migrations-up" ]
+    depends_on:
+      task-postgres:
+        condition: service_healthy
+        restart: true
+    restart: on-failure
+    networks:
+      - app-network
+
+  analytic-service-migrations:
+    build:
+      context: ./services/analytic-service
+      dockerfile: build/Dockerfile.migrations
+      target: migrations
+    container_name: analytic-service-migrations
+    environment:
+      DB_NAME: analytic
+      DB_USER: postgres
+      DB_HOST: analytic-postgres
+      DB_PORT: 5432
+    command: [ "make", "migrations-up" ]
+    depends_on:
+      analytic-postgres:
+        condition: service_healthy
+        restart: true
+    restart: on-failure
+    networks:
+      - app-network
+  ###########################################
+  #             BROKERS                     #
+  ###########################################
+
+  akhq:
+    image: tchiotludo/akhq:dev
+    container_name: akhq
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: "kafka:9092"
+    ports:
+      - "8090:8080"
+    links:
+      - kafka
+    networks:
+      - app-network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_LISTENERS: PLAINTEXT_INTERNAL://0.0.0.0:29092,PLAINTEXT_C://0.0.0.0:9093,PLAINTEXT_L://0.0.0.0:9092,
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://kafka:29092,PLAINTEXT_L://kafka:9092,PLAINTEXT_C://kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_L:PLAINTEXT,PLAINTEXT_C:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+    healthcheck:
+      test: [ "CMD","kafka-topics","--bootstrap-server", "kafka:9092", "--list" ]
+      interval: 1s
+      timeout: 2s
+      retries: 5
+    networks:
+      - app-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

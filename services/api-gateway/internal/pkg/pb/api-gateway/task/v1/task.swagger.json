@@ -1,0 +1,304 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Funny Tasks",
+    "description": "Task application",
+    "version": "1.0"
+  },
+  "tags": [
+    {
+      "name": "task"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/categories": {
+      "get": {
+        "summary": "Получить категории задач",
+        "operationId": "TaskService_GetCategories",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/api_gateway.task.v1.GetCategoriesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "tags": [
+          "task"
+        ]
+      }
+    },
+    "/v1/task": {
+      "get": {
+        "summary": "Получить задачу",
+        "operationId": "TaskService_GetTask",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/api_gateway.task.v1.GetTaskResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "task"
+        ]
+      },
+      "post": {
+        "summary": "Создать задачу",
+        "operationId": "TaskService_CreateTask",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/api_gateway.task.v1.CreateTaskResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "comment",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "executionTime",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "task"
+        ]
+      }
+    },
+    "/v1/task/list": {
+      "get": {
+        "summary": "Получить задачи пользователя",
+        "operationId": "TaskService_ListTasks",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/api_gateway.task.v1.ListTasksResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "task"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "api_gateway.task.v1.CreateTaskResponse": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "price": {
+          "$ref": "#/definitions/google.type.Money"
+        }
+      }
+    },
+    "api_gateway.task.v1.GetCategoriesResponse": {
+      "type": "object",
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/api_gateway.task.v1.GetCategoriesResponse.Category"
+          }
+        }
+      }
+    },
+    "api_gateway.task.v1.GetCategoriesResponse.Category": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "price": {
+          "$ref": "#/definitions/google.type.Money"
+        }
+      }
+    },
+    "api_gateway.task.v1.GetTaskResponse": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "result": {
+          "type": "object",
+          "title": "опциональный результат"
+        },
+        "price": {
+          "$ref": "#/definitions/google.type.Money"
+        }
+      }
+    },
+    "api_gateway.task.v1.ListTasksResponse": {
+      "type": "object",
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/api_gateway.task.v1.ListTasksResponse.Task"
+          }
+        }
+      }
+    },
+    "api_gateway.task.v1.ListTasksResponse.Task": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "result": {
+          "type": "object",
+          "title": "опциональный результат"
+        },
+        "price": {
+          "$ref": "#/definitions/google.type.Money"
+        }
+      }
+    },
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.protobuf.NullValue": {
+      "type": "string",
+      "enum": [
+        "NULL_VALUE"
+      ],
+      "default": "NULL_VALUE",
+      "description": "`NullValue` is a singleton enumeration to represent the null value for the\n`Value` type union.\n\nThe JSON representation for `NullValue` is JSON `null`.\n\n - NULL_VALUE: Null value."
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "google.type.Money": {
+      "type": "object",
+      "properties": {
+        "currencyCode": {
+          "type": "string",
+          "description": "The three-letter currency code defined in ISO 4217."
+        },
+        "units": {
+          "type": "string",
+          "format": "int64",
+          "description": "The whole units of the amount.\nFor example if `currencyCode` is `\"USD\"`, then 1 unit is one US dollar."
+        },
+        "nanos": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of nano (10^-9) units of the amount.\nThe value must be between -999,999,999 and +999,999,999 inclusive.\nIf `units` is positive, `nanos` must be positive or zero.\nIf `units` is zero, `nanos` can be positive, zero, or negative.\nIf `units` is negative, `nanos` must be negative or zero.\nFor example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000."
+        }
+      },
+      "description": "Represents an amount of money with its currency type."
+    }
+  }
+}

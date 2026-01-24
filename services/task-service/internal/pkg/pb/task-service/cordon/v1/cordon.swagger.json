@@ -1,0 +1,128 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "task-service/cordon/v1/cordon.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Cordon"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/task_service.cordon.v1.Cordon/Cordon": {
+      "post": {
+        "summary": "Выводит подик из балансировки нагрузки",
+        "operationId": "Cordon_Cordon",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/task_service.cordon.v1.CordonResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/task_service.cordon.v1.CordonRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Cordon"
+        ]
+      }
+    },
+    "/task_service.cordon.v1.Cordon/Uncordon": {
+      "post": {
+        "summary": "Заводит подик обратно в балансировку нагрузки",
+        "operationId": "Cordon_Uncordon",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/task_service.cordon.v1.UncordonResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/task_service.cordon.v1.UncordonRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Cordon"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "task_service.cordon.v1.CordonRequest": {
+      "type": "object"
+    },
+    "task_service.cordon.v1.CordonResponse": {
+      "type": "object"
+    },
+    "task_service.cordon.v1.UncordonRequest": {
+      "type": "object"
+    },
+    "task_service.cordon.v1.UncordonResponse": {
+      "type": "object"
+    }
+  }
+}

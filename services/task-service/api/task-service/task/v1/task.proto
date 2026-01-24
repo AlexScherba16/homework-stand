@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package task_service.task.v1;
+
+option go_package = "task-service/pkg/task/v1;taskV1";
+
+import "google/type/money.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/wrappers.proto";
+
+import "google/protobuf/struct.proto";
+
+service TaskService {
+  // Получить категории задач
+  rpc GetCategories(GetCategoriesRequest) returns (GetCategoriesResponse);
+
+  // Создать задачу
+  rpc CreateTask (CreateTaskRequest) returns (CreateTaskResponse);
+
+  // Получить задачу
+  rpc GetTask(GetTaskRequest) returns (GetTaskResponse);
+
+  // Получить задачи пользователя
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+}
+
+message GetCategoriesRequest{}
+
+message GetCategoriesResponse{
+  repeated Category categories = 1;
+
+  message Category {
+    string id = 1;
+    string title = 2;
+    string desc = 3;
+    google.type.Money price = 4;
+  }
+}
+
+message CreateTaskRequest {
+  int64 user_id = 1;
+
+  string category_id = 2;
+
+  string comment = 3;
+  google.protobuf.Duration execution_time =4;
+}
+
+message CreateTaskResponse {
+  string task_id = 1;
+  string status = 2;
+  google.type.Money price = 3;
+}
+
+message GetTaskRequest{
+  string task_id = 1;
+}
+
+message GetTaskResponse{
+  string task_id = 1;
+
+  string status = 2;
+  // опциональный результат
+  google.protobuf.Struct result = 3;
+
+  google.type.Money price = 4;
+}
+
+message ListTasksRequest {
+  int64 user_id = 1;
+}
+
+message ListTasksResponse {
+  repeated Task tasks = 1;
+
+  message Task {
+    string task_id = 1;
+
+    string status = 2;
+    // опциональный результат
+    google.protobuf.Struct result = 3;
+
+    google.type.Money price = 4;
+  }
+}

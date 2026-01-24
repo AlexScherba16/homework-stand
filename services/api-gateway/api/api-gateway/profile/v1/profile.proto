@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package api_gateway.profile.v1;
+
+option go_package = "api_gateway/pkg/profile/v1;profileV1";
+
+import "google/type/money.proto";
+import "google/type/decimal.proto";
+import "google/protobuf/timestamp.proto";
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Funny Tasks"
+    description: "Task application"
+    version: "1.0"
+  }
+};
+
+service ProfileService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {name: "profile"};
+
+  // Получить категории задач
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse) {
+    option (google.api.http) = {
+      get: "/v1/profile/info"
+    };
+  }
+
+  rpc GetProfileList(GetProfileListRequest) returns (GetProfileListResponse) {
+    option (google.api.http) = {
+      get: "/v1/profile/list"
+    };
+  }
+}
+
+message GetProfileRequest{
+  int64 user_id = 1;
+}
+
+message GetProfileResponse{
+  int64 user_id = 1;
+  string name = 2;
+  string email = 3;
+
+  Tariff tariff = 4;
+
+  message Tariff {
+    enum Enum{
+      UNKNOWN = 0;
+      BASE = 1;
+      MAX = 2;
+    }
+
+    Enum tariff = 1;
+  }
+}
+
+
+message GetProfileListRequest{
+  repeated int64 user_ids = 1;
+}
+
+message GetProfileListResponse{
+  repeated Profile profiles = 1;
+
+  message Profile{
+    int64 user_id = 1;
+    string name = 2;
+    string email = 3;
+    bool is_task_allowed = 4;
+  }
+}

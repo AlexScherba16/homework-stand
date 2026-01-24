@@ -1,0 +1,100 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "analytic-service/analytic/v1/analytic.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "AnalyticService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/analytic_service.order.v1.AnalyticService/GetUserTaskCount": {
+      "post": {
+        "operationId": "AnalyticService_GetUserTaskCount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/analytic_service.order.v1.GetUserTaskCountResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/analytic_service.order.v1.GetUserTaskCountRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AnalyticService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "analytic_service.order.v1.GetUserTaskCountRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "analytic_service.order.v1.GetUserTaskCountResponse": {
+      "type": "object",
+      "properties": {
+        "taskCount": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    }
+  }
+}

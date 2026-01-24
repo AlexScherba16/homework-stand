@@ -1,0 +1,46 @@
+graceful:
+  timeout: 5s
+
+grpc_server:
+  host: 0.0.0.0
+  port: 7002
+  max_connection_idle: 5m
+  max_connection_age: 5m
+  timeout: 5s
+  time: 120m
+
+http_server:
+  port: 8082
+
+postgres:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: "postgres"
+  database: profile
+  max_connections: 10
+  min_connections: 3
+  min_idle_connections: 3
+  max_con_lifetime: 5s
+
+cache:
+  key_version: v1
+  soft_ttl: 5m
+  hard_ttl: 10m
+  jitter_percentage: 0.3
+  negative:
+    not_found_ttl: 30s
+
+redis_cluster:
+  addresses:
+    - profile-redis-oss-1:6000
+    - profile-redis-oss-2:6001
+    - profile-redis-oss-3:6002
+    - profile-redis-oss-4:6003
+    - profile-redis-oss-5:6004
+    - profile-redis-oss-6:6005
+  max_retries: 4
+  dial_timeout: 10s
+  read_timeout: 3s
+  write_timeout: 3s
+

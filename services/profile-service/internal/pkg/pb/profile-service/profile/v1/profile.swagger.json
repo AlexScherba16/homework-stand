@@ -1,0 +1,307 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "profile-service/profile/v1/profile.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "ProfileService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/profile_service.order.v1.ProfileService/CheckPermission": {
+      "post": {
+        "summary": "Проверить доступные лимиты",
+        "operationId": "ProfileService_CheckPermission",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profile_service.order.v1.CheckPermissionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profile_service.order.v1.CheckPermissionRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ProfileService"
+        ]
+      }
+    },
+    "/profile_service.order.v1.ProfileService/CreateProfile": {
+      "post": {
+        "summary": "Создать профиль",
+        "operationId": "ProfileService_CreateProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profile_service.order.v1.CreateProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profile_service.order.v1.CreateProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ProfileService"
+        ]
+      }
+    },
+    "/profile_service.order.v1.ProfileService/GetProfile": {
+      "post": {
+        "summary": "Получить информацию о профиле",
+        "operationId": "ProfileService_GetProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profile_service.order.v1.GetProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profile_service.order.v1.GetProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ProfileService"
+        ]
+      }
+    },
+    "/profile_service.order.v1.ProfileService/GetProfileList": {
+      "post": {
+        "summary": "Получить список профилей",
+        "operationId": "ProfileService_GetProfileList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profile_service.order.v1.GetProfileListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profile_service.order.v1.GetProfileListRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ProfileService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "profile_service.order.v1.CheckPermissionRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "profile_service.order.v1.CheckPermissionResponse": {
+      "type": "object",
+      "properties": {
+        "allowed": {
+          "type": "boolean",
+          "title": "можно создать задачу?"
+        }
+      }
+    },
+    "profile_service.order.v1.CreateProfileRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "isTaskAllowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "profile_service.order.v1.CreateProfileResponse": {
+      "type": "object"
+    },
+    "profile_service.order.v1.GetProfileListRequest": {
+      "type": "object",
+      "properties": {
+        "userIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          }
+        }
+      }
+    },
+    "profile_service.order.v1.GetProfileListResponse": {
+      "type": "object",
+      "properties": {
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/profile_service.order.v1.GetProfileListResponse.Profile"
+          }
+        }
+      }
+    },
+    "profile_service.order.v1.GetProfileListResponse.Profile": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "isTaskAllowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "profile_service.order.v1.GetProfileRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "profile_service.order.v1.GetProfileResponse": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "tariff": {
+          "$ref": "#/definitions/profile_service.order.v1.GetProfileResponse.Tariff"
+        }
+      }
+    },
+    "profile_service.order.v1.GetProfileResponse.Tariff": {
+      "type": "object",
+      "properties": {
+        "tariff": {
+          "$ref": "#/definitions/profile_service.order.v1.GetProfileResponse.Tariff.Enum"
+        }
+      }
+    },
+    "profile_service.order.v1.GetProfileResponse.Tariff.Enum": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "BASE",
+        "MAX"
+      ],
+      "default": "UNKNOWN"
+    }
+  }
+}
