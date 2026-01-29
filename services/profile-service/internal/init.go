@@ -19,9 +19,11 @@ import (
 	"profile-service/internal/pkg/grpc/intercept"
 	"profile-service/internal/pkg/healthcheck"
 	profileV1 "profile-service/internal/pkg/pb/profile-service/profile/v1"
+	"profile-service/internal/pkg/timeout"
 
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/not-for-prod/clay/server"
@@ -104,6 +106,8 @@ func (a *App) initAdminServer(ctx context.Context) error {
 	}
 
 	a.adminMux = chi.NewMux()
+
+	a.adminMux.Handle("/metrics", promhttp.Handler())
 
 	a.adminMux.Mount("/debug", chimw.Profiler())
 
@@ -201,10 +205,16 @@ func (a *App) initHealthCheck(_ context.Context) error {
 }
 
 func (a *App) initGrpcConn(_ context.Context) error {
-	for _, srv := range []string{config.AnalyticService} {
-		var err error
+	// регистрируем конфиги всех сервисов, для которых у нас есть timeout'ы
+	timeout.SetServiceClientTimeoutSettings(config.Instance().ExternalTimeouts)
 
-		conn, err := grpc.NewClient(config.Instance().Targets[srv],
+	for _, srv := range []string{config.AnalyticService} {
+		var (
+			err    error
+			target = config.Instance().Targets[srv]
+		)
+
+		conn, err := grpc.NewClient(target,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithChainUnaryInterceptor(
 				intercept.SetClientNameInterceptor(config.AppName),

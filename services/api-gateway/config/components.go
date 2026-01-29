@@ -11,6 +11,10 @@ type GrpcServer struct {
 	Time              time.Duration `yaml:"time"`
 }
 
+type ExternalCalls struct {
+	Timeout time.Duration `yaml:"timeout"`
+}
+
 type HttpServer struct {
 	Port      int `yaml:"port" env:"HTTP_PORT"`
 	AdminPort int `yaml:"admin_port" env:"ADMIN_HTTP_PORT"`

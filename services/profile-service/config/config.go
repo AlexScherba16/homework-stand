@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 
+	"profile-service/internal/pkg/timeout"
+
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
@@ -28,6 +30,8 @@ type Config struct {
 	Postgres     Postgres     `yaml:"postgres"`
 	RedisCluster RedisCluster `yaml:"redis_cluster"`
 	Cache        Cache        `yaml:"cache"`
+
+	ExternalTimeouts timeout.ServiceClientSettings `yaml:"external_timeouts"`
 
 	Graceful Graceful          `yaml:"graceful"`
 	Targets  map[string]string `yaml:"service"`

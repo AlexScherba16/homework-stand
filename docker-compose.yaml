@@ -47,6 +47,7 @@ services:
     ports:
       - "7002:7002"
       - "8082:8080"
+      - "8091:8081"
     stop_grace_period: 10s
     command: ["sleep", "20s"]
     depends_on:

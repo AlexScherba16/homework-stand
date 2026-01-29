@@ -22,10 +22,11 @@ const (
 )
 
 type Config struct {
-	GrpcServer GrpcServer        `yaml:"grpc_server"`
-	HttpServer HttpServer        `yaml:"http_server"`
-	Graceful   Graceful          `yaml:"graceful"`
-	Targets    map[string]string `yaml:"service"`
+	GrpcServer    GrpcServer        `yaml:"grpc_server"`
+	HttpServer    HttpServer        `yaml:"http_server"`
+	Graceful      Graceful          `yaml:"graceful"`
+	ExternalCalls ExternalCalls     `yaml:"external_calls"`
+	Targets       map[string]string `yaml:"service"`
 }
 
 func Instance() *Config {
