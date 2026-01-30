@@ -52,7 +52,11 @@ type App struct {
 
 	services *service.Registry
 
-	started    int32
+	started int32
+
+	// terminated signals that the application has started graceful shutdown.
+	// In this state the app skips incoming traffic (not ready) and
+	// on the next liveness check transitions to unhealthy.
 	terminated int32
 
 	// Refer to README for more info about cordon/uncordon mechanism
