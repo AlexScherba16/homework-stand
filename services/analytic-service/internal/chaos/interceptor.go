@@ -2,6 +2,8 @@ package chaos
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"math/rand"
 	"sync/atomic"
 	"time"
@@ -13,10 +15,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var requests int32 // количество одновременных запросов
+var slowSince atomic.Int64 // unix nano; 0 => не в Slow
 
 func ModeInterceptor(store *mode.Store) grpc.UnaryServerInterceptor {
-	rand.Seed(time.Now().UnixNano())
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	return func(
 		ctx context.Context,
@@ -24,36 +26,69 @@ func ModeInterceptor(store *mode.Store) grpc.UnaryServerInterceptor {
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (interface{}, error) {
-		atomic.AddInt32(&requests, 1)
+		slog.Info(fmt.Sprintf("method '%s' was invoked", info.FullMethod))
 
 		md := store.Get()
-		switch md {
-		case mode.Error:
-			return nil, status.Error(codes.Unavailable, "analytic in error mode")
-		case mode.RareError:
-			// 5% вероятности ошибки
-			if rand.Intn(100) < 5 {
-				return nil, status.Error(codes.Unavailable, "analytic flaky error")
-			}
-			return handler(ctx, req)
-		case mode.Slow:
-			delay := 200*time.Millisecond + time.Duration(atomic.LoadInt32(&requests))*100*time.Millisecond
 
+		switch md {
+
+		// ---------------- SLOW ----------------
+
+		case mode.Slow:
+			now := time.Now().UnixNano()
+
+			// Если только что вошли в Slow — запоминаем время входа
+			if slowSince.Load() == 0 {
+				slowSince.Store(now)
+			}
+
+			elapsed := time.Duration(now - slowSince.Load())
+
+			// Каждые 500ms деградация усиливается
+			steps := elapsed / (500 * time.Millisecond)
+
+			delay := 200*time.Millisecond +
+				steps*100*time.Millisecond
 			select {
 			case <-time.After(delay):
 				return handler(ctx, req)
 			case <-ctx.Done():
 				return nil, status.Error(codes.DeadlineExceeded, "request deadline exceeded")
 			}
+
+		// ---------------- ERROR ----------------
+
+		case mode.Error:
+			resetSlow()
+			return nil, status.Error(codes.Unavailable, "analytic in error mode")
+
+		// ---------------- RARE ERROR ----------------
+
+		case mode.RareError:
+			resetSlow()
+			if r.Intn(100) < 5 {
+				return nil, status.Error(codes.Unavailable, "analytic rare error")
+			}
+			return handler(ctx, req)
+
+		// ---------------- FLAKY ----------------
+
 		case mode.Flaky:
-			// 40% вероятности ошибки
-			if rand.Intn(100) < 40 {
+			resetSlow()
+			if r.Intn(100) < 40 {
 				return nil, status.Error(codes.Unavailable, "analytic flaky error")
 			}
 			return handler(ctx, req)
+
+		// ---------------- OK ----------------
+
 		default: // ModeOK
-			atomic.StoreInt32(&requests, 0)
+			resetSlow()
 			return handler(ctx, req)
 		}
 	}
+}
+
+func resetSlow() {
+	slowSince.Store(0)
 }

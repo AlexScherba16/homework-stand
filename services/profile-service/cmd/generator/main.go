@@ -15,6 +15,8 @@ import (
 
 func main() {
 	profileAddr := "localhost:7002" // адрес profile сервиса
+
+	// Подключение к gRPC серверу
 	conn, err := grpc.Dial(profileAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("failed to connect: %v", err)
@@ -23,41 +25,55 @@ func main() {
 
 	client := profileV1.NewProfileServiceClient(conn)
 
+	// Список пользователей
+	userIDs := []int64{1, 2, 3}
+	userIndex := 0
+
+	// Канал для логирования
+	ch := make(chan string, 100)
+	defer close(ch)
+
+	// Запускаем отдельный горутин для логирования
+	go func() {
+		for msg := range ch {
+			slog.Info(msg)
+		}
+	}()
+
+	// Тикер для генерации запросов каждые 500ms
 	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
 
-	userIDs := []int64{1, 2, 3} // список пользователей
-
-	userIndex := 0
-
 	for range ticker.C {
-		start := time.Now()
+		idx := userIndex
+		userIndex = (userIndex + 1) % len(userIDs)
 
-		userID := userIDs[userIndex]
-		userIndex = (userIndex + 1) % len(userIDs) // циклично проходим по списку
+		go func(userID int64) {
+			start := time.Now()
 
-		// создаём контекст с timeout на одну операцию 3 секунды
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			// Контекст с таймаутом на один запрос 3с
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			defer cancel()
 
-		resp, err := client.GetProfile(ctx, &profileV1.GetProfileRequest{
-			UserId: userID,
-		})
-		cancel()
+			resp, err := client.GetProfile(ctx, &profileV1.GetProfileRequest{
+				UserId: userID,
+			})
 
-		elapsed := time.Since(start)
+			elapsed := time.Since(start)
 
-		if err != nil {
-			st, ok := status.FromError(err)
-			if ok {
-				slog.Info(fmt.Sprintf("[ERROR] gRPC status=%v  err=%v (took %v)\n",
-					st.Code(), err, elapsed))
-			} else {
-				slog.Info(fmt.Sprintf("[ERROR] %v (took %v)\n", err, elapsed))
+			if err != nil {
+				// Преобразуем ошибку в gRPC статус, если возможно
+				if st, ok := status.FromError(err); ok {
+					ch <- fmt.Sprintf("[ERROR] user=%d grpc_status=%v err=%v took=%v",
+						userID, st.Code(), err, elapsed)
+				} else {
+					ch <- fmt.Sprintf("[ERROR] user=%d err=%v took=%v", userID, err, elapsed)
+				}
+				return
 			}
-			continue
-		}
 
-		// результат и время
-		slog.Info(fmt.Sprintf("[RESULT] took=%v result=%v\n", elapsed, resp.String()))
+			// Успешный результат
+			ch <- fmt.Sprintf("[RESULT] user=%d took=%v result=%v", userID, elapsed, resp.String())
+		}(userIDs[idx])
 	}
 }

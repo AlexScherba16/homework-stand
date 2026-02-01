@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/samber/lo"
 	"github.com/sony/gobreaker/v2"
 )
 
@@ -29,19 +30,34 @@ func newInternalState(config MainConfig, name string) *internalState {
 		ReadyToTrip: func(counts gobreaker.Counts) bool {
 			// Срабатываем, если количество ошибок превышает порог
 			// Тут смотрим как на последовательные ошибки, так и на общий процент в окне
-			enoughRequests := counts.Requests > 50
+
+			enoughRequests := counts.Requests > 10 // берем от 10 запросов
 
 			consecutiveFailuresExceeded := counts.ConsecutiveFailures >= config.ThresholdConsecutive
 
-			totalFailuresExceeded := (counts.TotalFailures * 100 / counts.Requests) > config.ThresholdPercentage
+			var failurePercentage uint32
+			if counts.Requests != 0 {
+				failurePercentage = counts.TotalFailures * 100 / counts.Requests
+			}
+
+			totalFailuresExceeded := failurePercentage > config.ThresholdPercentage
 
 			shouldOpen := enoughRequests && (consecutiveFailuresExceeded || totalFailuresExceeded)
 
+			slog.Info("circuit stats on failed request",
+				"количество запросов", counts.Requests,
+				"всего запросов", counts.Requests,
+				"всего ошибок", counts.TotalFailures,
+				"всего успехов", counts.TotalSuccesses,
+				"последовательные ошибки", counts.ConsecutiveFailures,
+				"последовательные успехи", counts.ConsecutiveSuccesses,
+				"процент ошибок от общего числа запросов", failurePercentage,
+			)
 			if shouldOpen {
-				slog.Info("circuit opened condition",
-					"достаточно ли запросов для выборки", enoughRequests,
-					"превышено кол-во последовательных ошибок", consecutiveFailuresExceeded,
-					"превышен общий процент ошибок от числа запросов", totalFailuresExceeded,
+				slog.Info("circuit opened condition triggered",
+					"достаточно ли запросов для выборки", lo.Ternary(enoughRequests, "да", "нет"),
+					"превышено кол-во последовательных ошибок", lo.Ternary(consecutiveFailuresExceeded, "да", "нет"),
+					"превышен общий процент ошибок от числа запросов", lo.Ternary(totalFailuresExceeded, "да", "нет"),
 				)
 			}
 
