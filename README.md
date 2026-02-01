@@ -123,7 +123,7 @@ const (
 
 Для теста можно подергать ручку сервиса аналитики напрямую через:
 
-1) grpcui командой `grpcui --plaintext localhost:8084`
+1) grpcui командой `grpcui --plaintext localhost:7004`
 2) вызвать ее в `swagger` по адресу `http://localhost:8084/docs`
 
 
