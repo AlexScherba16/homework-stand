@@ -2,7 +2,8 @@ package get_profile
 
 import (
 	"context"
-
+	"log/slog"
+	
 	"profile-service/internal/domain/entity"
 )
 
@@ -29,14 +30,14 @@ func (s *Service) GetProfile(ctx context.Context, userID int64) (*entity.Profile
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// получаем кол-во задач
 	taskCount, err := s.taskProvider.GetUserTaskCount(ctx, userID)
 	if err != nil {
-		return nil, err
+		taskCount = 0
+		slog.Warn("Degradation to default profile", "task", taskCount, "userID", userID, "err", err)
 	}
-
+	
 	profile.WithTariff(taskCount)
-
 	return profile, nil
 }
